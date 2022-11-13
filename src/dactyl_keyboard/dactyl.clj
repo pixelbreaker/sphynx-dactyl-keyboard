@@ -16,22 +16,22 @@
 
 (def column-curvature (deg2rad 17))                         ; 15                        ; curvature of the columns
 (def row-curvature (deg2rad 6))                             ; 5                   ; curvature of the rows
-(def centerrow 1.75)                              ; controls front-back tilt
+(def centerrow (- nrows 2.5))                              ; controls front-back tilt
 (def centercol 3)                                           ; controls left-right tilt / tenting (higher number is more tenting)
-(def tenting-angle (deg2rad 15))                            ; or, change this for more precise tenting control
+(def tenting-angle (deg2rad 13))                            ; or, change this for more precise tenting control
 (def column-style
   (if (> nrows 5) :orthographic :standard))
 (defn column-offset [column] (cond
-                               (= column 2) [0 5 -3]
+                               (= column 2) [0 3 -3]
                                (= column 3) [0 0 -0.5]
-                               (>= column 4) [0 -10 6]
+                               (>= column 4) [0 -3 2]
                                :else [0 0 0]))
 
 (def thumb-offsets [10 -5 1])
 
-(def keyboard-z-offset 7)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
+(def keyboard-z-offset 8)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 (def bottom-height 2)                                    ; plexiglass plate or printed plate
-(def extra-width 3)                                       ; extra space between the base of keys; original= 2
+(def extra-width 2)                                       ; extra space between the base of keys; original= 2
 (def extra-height -0.5)                                      ; original= 0.5
 
 (def wall-z-offset -1)                                      ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
@@ -584,6 +584,9 @@
 ;
 (spit "things/right.scad"
       (write-scad model-right))
+
+(spit "things/left.scad"
+      (write-scad (mirror [-1 0 0] model-right)))
 ;
 ;(spit "things/left.scad"
 ;      (write-scad (mirror [-1 0 0] model-right)))
