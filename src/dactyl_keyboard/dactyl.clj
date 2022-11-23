@@ -12,26 +12,34 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 
 (def nrows 4)
-(def ncols 6)
+(def ncols 5)
+(def trackpad true)
+(def bottom-row false)
 
-(def column-curvature (deg2rad 17))                         ; 15                        ; curvature of the columns
-(def row-curvature (deg2rad 6))                             ; 5                   ; curvature of the rows
-(def centerrow (- nrows 2.5))                              ; controls front-back tilt
+(def column-curvature (deg2rad 17))                         ; 15       ; curvature of the columns
+(def row-curvature (deg2rad 6))                             ; 5        ; curvature of the rows
+(def centerrow (- nrows 2.5))                               ; controls front-back tilt
 (def centercol 3)                                           ; controls left-right tilt / tenting (higher number is more tenting)
-(def tenting-angle (deg2rad 13))                            ; or, change this for more precise tenting control
+(def tenting-angle (deg2rad 14))                            ; or, change this for more precise tenting control
 (def column-style
   (if (> nrows 5) :orthographic :standard))
+
+;; (defn column-offset [column] (cond
+;;                                (= column 2) [0 5 -3]
+;;                                (= column 3) [0 0 -0.5]
+;;                                (>= column 4) [0 -10 6]
+;;                                :else [0 0 0]))
 (defn column-offset [column] (cond
                                (= column 2) [0 3 -3]
                                (= column 3) [0 0 -0.5]
-                               (>= column 4) [0 -3 2]
+                               (>= column 4) [0 -8 3]
                                :else [0 0 0]))
 
-(def thumb-offsets [10 -5 1])
+(def thumb-offsets [15 -5 -2])
 
 (def keyboard-z-offset 8)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 (def bottom-height 2)                                    ; plexiglass plate or printed plate
-(def extra-width 2)                                       ; extra space between the base of keys; original= 2
+(def extra-width 1.8)                                       ; extra space between the base of keys; original= 2
 (def extra-height -0.5)                                      ; original= 0.5
 
 (def wall-z-offset -1)                                      ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
@@ -114,20 +122,21 @@
 
 (def sa-length 18.25)
 (def sa-double-length 37.5)
-(def sa-cap {1   (let [bl2 (/ 18.5 2)
-                       m (/ 17 2)
+(def sa-cap {1   (let [bl2 (/ 17.5 2)
+                       m (/ 16.5 2)
                        key-cap (hull (->> (polygon [[bl2 bl2] [bl2 (- bl2)] [(- bl2) (- bl2)] [(- bl2) bl2]])
                                           (extrude-linear {:height 0.1 :twist 0 :convexity 0})
                                           (translate [0 0 0.05]))
                                      (->> (polygon [[m m] [m (- m)] [(- m) (- m)] [(- m) m]])
                                           (extrude-linear {:height 0.1 :twist 0 :convexity 0})
-                                          (translate [0 0 6]))
-                                     (->> (polygon [[6 6] [6 -6] [-6 -6] [-6 6]])
-                                          (extrude-linear {:height 0.1 :twist 0 :convexity 0})
-                                          (translate [0 0 12])))]
+                                          (translate [0 0 4]))
+                                    ;;  (->> (polygon [[6 6] [6 -6] [-6 -6] [-6 6]])
+                                    ;;       (extrude-linear {:height 0.1 :twist 0 :convexity 0})
+                                    ;;       (translate [0 0 12]))
+                                          )]
                    (->> key-cap
-                        (translate [0 0 (+ 5 plate-thickness)])
-                        (color [220/255 163/255 163/255 1])))
+                        (translate [0 0 (+ 2 plate-thickness)])
+                        (color [0.8 0.8 0.8 1])))
              2   (let [bl2 sa-length
                        bw2 (/ 18.25 2)
                        key-cap (hull (->> (polygon [[bw2 bl2] [bw2 (- bl2)] [(- bw2) (- bl2)] [(- bw2) bl2]])
@@ -227,7 +236,7 @@
   (apply union
          (for [column columns
                row rows
-               :when (or (.contains [2 3] column)
+               :when (or (and (.contains [2 3] column) (not= bottom-row false))
                          (not= row lastrow))]
            (->> shape
                 (key-place column row)))))
@@ -262,7 +271,7 @@
 
 ; fat web post for very steep angles between thumb and finger clusters
 ; this ensures the walls stay somewhat thicker
-(def fat-post-size 1.2)
+(def fat-post-size 1.3)
 (def fat-web-post (->> (cube fat-post-size fat-post-size web-thickness)
                        (translate [0 0 (+ (/ web-thickness -2)
                                           plate-thickness)])))
@@ -331,9 +340,10 @@
        (translate move)))
 
 ; convexer
-(defn thumb-r-place [shape] (thumb-place [14 -40 10] [-15 -10 5] shape)) ; right
-(defn thumb-m-place [shape] (thumb-place [10 -23 20] [-33 -15 -6] shape)) ; middle
-(defn thumb-l-place [shape] (thumb-place [6 -5 35] [-52.5 -25.5 -11.5] shape)) ; left
+(defn thumb-r-place [shape] (thumb-place [14 -37 10] [-15 -10 3] shape)) ; right
+(defn thumb-m-place [shape] (thumb-place [10 -21 20] [-33 -15 -7] shape)) ; middle
+(defn thumb-l-place [shape] (thumb-place [6 -3 35] [-52.5 -25.5 -11.5] shape)) ; left
+
 
 (defn thumb-layout [shape]
   (union
@@ -361,9 +371,9 @@
 (defn bottom-hull [& p]
   (hull p (bottom 0.001 p)))
 
-(defn wall-locate1 [dx dy] [(* dx wall-thickness) (* dy wall-thickness) 0])
-(defn wall-locate2 [dx dy] [(* dx wall-xy-offset) (* dy wall-xy-offset) wall-z-offset])
-(defn wall-locate3 [dx dy] [(* dx (+ wall-xy-offset wall-thickness)) (* dy (+ wall-xy-offset wall-thickness)) wall-z-offset])
+(defn wall-locate1 [dx dy] [(* dx wall-thickness) (* dy wall-thickness) 0]) ; base
+(defn wall-locate2 [dx dy] [(* dx wall-xy-offset) (* dy wall-xy-offset) wall-z-offset]) ; key
+(defn wall-locate3 [dx dy] [(* dx (+ wall-xy-offset wall-thickness)) (* dy (+ wall-xy-offset wall-thickness)) wall-z-offset]) ; key + wall
 
 (def thumb-connectors
   (union
@@ -378,7 +388,7 @@
       (thumb-m-place web-post-bl)
       (thumb-l-place web-post-br)
       (thumb-m-place web-post-bl))
-    (triangle-hulls                                         ; top two to the main keyboard, starting on the left
+    (if bottom-row (triangle-hulls                                         ; top two to the main keyboard, starting on the left
       (key-place 2 lastrow web-post-br)
       (key-place 3 lastrow web-post-bl)
       (key-place 2 lastrow web-post-tr)
@@ -386,7 +396,7 @@
       (key-place 3 cornerrow web-post-bl)
       (key-place 3 lastrow web-post-tr)
       (key-place 3 cornerrow web-post-br)
-      (key-place 4 cornerrow web-post-bl))
+      (key-place 4 cornerrow web-post-bl)))
     (triangle-hulls
       (key-place 1 cornerrow web-post-br)
       (key-place 2 lastrow web-post-tl)
@@ -394,11 +404,12 @@
       (key-place 2 lastrow web-post-tr)
       (key-place 2 cornerrow web-post-br)
       (key-place 3 cornerrow web-post-bl))
-    (triangle-hulls
-      (key-place 3 lastrow web-post-tr)
-      (key-place 3 lastrow web-post-br)
-      (key-place 3 lastrow web-post-tr)
-      (key-place 4 cornerrow web-post-bl))
+    (if bottom-row 
+      (triangle-hulls
+        (key-place 3 lastrow web-post-tr)
+        (key-place 3 lastrow web-post-br)
+        (key-place 3 lastrow web-post-tr)
+        (key-place 4 cornerrow web-post-bl)))
     (hull                                                   ; between thumb m and top key
       (key-place 0 cornerrow (translate (wall-locate1 -1 0) web-post-bl))
       (thumb-m-place web-post-tr)
@@ -425,18 +436,32 @@
       (key-place 1 cornerrow web-post-br)
       (key-place 2 lastrow web-post-tl)
       )
-    (triangle-hulls
-      (key-place 2 lastrow web-post-tl)
-      (thumb-r-place fat-web-post-tr)
-      (key-place 2 lastrow web-post-bl)
-      (thumb-r-place fat-web-post-br)
-      )
-    (triangle-hulls
-      (thumb-r-place web-post-br)
-      (key-place 2 lastrow web-post-bl)
-      (key-place 3 lastrow web-post-bl)
-      (key-place 2 lastrow web-post-br)
-      )
+    (if bottom-row 
+      (union
+        (triangle-hulls
+          (key-place 2 lastrow web-post-tl)
+          (thumb-r-place fat-web-post-tr)
+          (key-place 2 lastrow web-post-bl)
+          (thumb-r-place fat-web-post-br)
+          )
+        (triangle-hulls
+          (thumb-r-place web-post-br)
+          (key-place 2 lastrow web-post-bl)
+          (key-place 3 lastrow web-post-bl)
+          (key-place 2 lastrow web-post-br)
+          ))
+      (union 
+        (triangle-hulls
+          (key-place 2 lastrow web-post-tl)
+          (thumb-r-place fat-web-post-tr)
+          (key-place 3 cornerrow web-post-bl)
+          (thumb-r-place fat-web-post-br)
+          )
+        (triangle-hulls
+          (key-place 2 lastrow web-post-tr)
+          (key-place 3 cornerrow web-post-bl)
+          (thumb-r-place fat-web-post-br)
+          )))
     ))
 
 ; dx1, dy1, dx2, dy2 = direction of the wall. '1' for front, '-1' for back, '0' for 'not in this direction'.
@@ -477,24 +502,36 @@
          (key-corner lastcol cornerrow :br)))
 
 
+
 (def case-walls
   (union
     right-wall
     ; back wall
     (for [x (range 0 ncols)] (key-wall-brace x 0 0 1 web-post-tl x 0 0 1 web-post-tr))
     (for [x (range 1 ncols)] (key-wall-brace x 0 0 1 web-post-tl (dec x) 0 0 1 web-post-tr))
-    ; left wall
+    ;; ; left wall
     (for [y (range 0 lastrow)] (key-wall-brace 0 y -1 0 web-post-tl 0 y -1 0 web-post-bl))
     (for [y (range 1 lastrow)] (key-wall-brace 0 (dec y) -1 0 web-post-bl 0 y -1 0 web-post-tl))
-    (wall-brace (partial key-place 0 cornerrow) -1 0 web-post-bl thumb-m-place 0 1 web-post-tl)
-    ; left-back-corner
+    (wall-brace (partial key-place 0 cornerrow) -1 0 web-post-bl thumb-m-place -0.5 1 web-post-tl)
+    ;; ; left-back-corner
     (key-wall-brace 0 0 0 1 web-post-tl 0 0 -1 0 web-post-tl)
-    ; front wall
-    (key-wall-brace 3 lastrow 0 -1 web-post-bl 3 lastrow 0.5 -1 web-post-br)
-    (key-wall-brace 3 lastrow 0.5 -1 web-post-br 4 cornerrow 0.5 -1 web-post-bl)
+    ;; ; front wall
+    (if bottom-row
+      (union 
+        (key-wall-brace 3 lastrow 0 -1 web-post-bl 3 lastrow 0.5 -1 web-post-br)
+        (key-wall-brace 3 lastrow 0.5 -1 web-post-br 4 cornerrow 0.5 -1 web-post-bl))
+      (union
+        (key-wall-brace 3 cornerrow 0 -1 web-post-bl 3 cornerrow 0 -1 web-post-br)
+        (key-wall-brace 3 cornerrow 0 -1 web-post-br 4 cornerrow 0 -1 web-post-bl)))
     (for [x (range 4 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl x cornerrow 0 -1 web-post-br)) ; TODO fix extra wall
-    (for [x (range 5 ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl (dec x) cornerrow 0 -1 web-post-br))
-    (wall-brace thumb-r-place 0 -1 web-post-br (partial key-place 3 lastrow) 0 -1 web-post-bl)
+    (for [x (range (if bottom-row 5 4) ncols)] (key-wall-brace x cornerrow 0 -1 web-post-bl (dec x) cornerrow 0 -1 web-post-br))
+    
+    (if bottom-row
+      (wall-brace thumb-r-place 0 -1 web-post-br (partial key-place 3 lastrow) 0 -1 web-post-bl)
+      (union
+        (wall-brace thumb-r-place 0 -1 web-post-br (partial key-place 3 cornerrow) 0 -1 web-post-bl)
+      ))
+    
     ; thumb walls
     (wall-brace thumb-r-place 0 -1 web-post-br thumb-r-place 0 -1 web-post-bl)
     (wall-brace thumb-m-place 0 -1 web-post-br thumb-m-place 0 -1 web-post-bl)
@@ -511,7 +548,6 @@
     (wall-brace thumb-l-place -1 0 web-post-bl thumb-l-place -1 0 web-post-tl)
     ))
 
-
 ; Screw insert definition & position
 (defn screw-insert-shape [bottom-radius top-radius height]
   (->> (binding [*fn* 30]
@@ -525,11 +561,17 @@
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
   (union (screw-insert 2 0 bottom-radius top-radius height [-4 4.5 bottom-height]) ; top middle
-         (screw-insert 0 1 bottom-radius top-radius height [-5.3 -8 bottom-height]) ; left
-         (screw-insert 0 lastrow bottom-radius top-radius height [-12 -7 bottom-height]) ;thumb
+         (screw-insert 0 1 bottom-radius top-radius height [-5.3 -12 bottom-height]) ; left
+         (if bottom-row
+          (screw-insert 0 lastrow bottom-radius top-radius height [-12 -7 bottom-height]) ;thumb
+          (screw-insert 0 lastrow bottom-radius top-radius height [-12 -9 bottom-height]) ;thumb         
+         )
          (screw-insert (- lastcol 1) lastrow bottom-radius top-radius height [10 13.5 bottom-height]) ; bottom right
          (screw-insert (- lastcol 1) 0 bottom-radius top-radius height [10 5 bottom-height]) ; top right
-         (screw-insert 2 (+ lastrow 1) bottom-radius top-radius height [0 6.5 bottom-height]))) ;bottom middle
+         (if bottom-row 
+          (screw-insert 2 (+ lastrow 1) bottom-radius top-radius height [0 6.5 bottom-height])
+          (screw-insert 2 (+ cornerrow 1) bottom-radius top-radius height [2 0.5 bottom-height]))
+         )) ;bottom middle
 
 ; Hole Depth Y: 4.4
 (def screw-insert-height 4)
@@ -543,12 +585,57 @@
 (def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.65) (+ screw-insert-top-radius 1.65) (+ screw-insert-height 1.5)))
 (def screw-insert-screw-holes (screw-insert-all-shapes 1.7 1.7 350))
 
+(def holder-depth 30)
+(def holder-rad (/ 37 2))
+(def holder-rad2 3)
+
+(def trackpad-holder-body (->> (difference
+    (binding [*fn* 120] (cylinder [holder-rad holder-rad2] holder-depth))
+    (cylinder [(- holder-rad 2) (- holder-rad2 2)] (+ holder-depth 0.2))
+  )
+  (rotate (deg2rad 90) [1 0 0])
+  (translate [0 (- (/ holder-depth 2)) 0])
+))
+
+(def trackpad-holder (union
+                    (->> (import "../things/cirque-35-flat.stl")
+                      (rotate (deg2rad 270) [1 0 0])
+                      (rotate (deg2rad 180) [0 1 0])
+                    )
+                    trackpad-holder-body))
+
+(defn trackpad-pos [shape]
+  (->> shape
+  (rotate (deg2rad 148) [1 0 0])
+  (rotate (deg2rad -8) [0 1 0])
+  (rotate (deg2rad -18) [0 0 1])
+  (translate thumborigin)
+  (translate [-58 0 8])
+)
+)
+
+(def trackpad-holder (trackpad-pos trackpad-holder))
+
+(def trackpad-holder-cutaway (->>
+  (cylinder [(- holder-rad 0.1) (- holder-rad2 0.1)] (+ holder-depth 0.5)) 
+  (rotate (deg2rad 90) [1 0 0])
+  (translate [0 (- (/ holder-depth 2)) 0])
+))
+
+(def trackpad-holder-cutaway (trackpad-pos trackpad-holder-cutaway))
+
+(def trackpad-holder-cutaway2 (->>
+  (cylinder (+ holder-rad 4) 10) 
+  (rotate (deg2rad 90) [1 0 0])
+  (translate [0 0 0])
+))
+(def trackpad-holder-cutaway2 (trackpad-pos trackpad-holder-cutaway2))
 
 
 (def usb-holder (mirror [-1 0 0]
                     (import "../things/holder v8.stl")))
 
-(def usb-holder (translate [-40.8 45.5 bottom-height] usb-holder))
+(def usb-holder (translate [-40.8 41.5 bottom-height] usb-holder))
 (def usb-holder-space
   (translate [0 0 (/ (+  bottom-height 8.2) 2)]
   (extrude-linear {:height (+ bottom-height 8.2) :twist 0 :convexity 0}
@@ -565,6 +652,8 @@
       connectors
       thumb-fill
       thumb-connectors
+      (if trackpad trackpad-holder)
+      (if trackpad trackpad-holder-cutaway)
       case-walls)))
 
 (def model-right
@@ -573,23 +662,38 @@
       key-holes
       connectors
       thumb
-      thumb-connectors
-      (difference (union case-walls
+      ;; (debug usb-holder)
+      (if trackpad
+        (do (difference (union thumb-connectors) trackpad-holder-cutaway))
+        thumb-connectors
+      )
+      (if trackpad 
+        (difference trackpad-holder
+          (difference 
+            (union 
+              (rotate (deg2rad 8) [0 0 1]
+                (translate [-38 0 -2]
+                  (cube 50 100 100)
+                ))
+              ;; key-space-below
+            )
+            trackpad-holder-cutaway2)
+        ))
+        (difference (union case-walls
                          screw-insert-outers
                          )
                   usb-holder-space
+                  (if trackpad trackpad-holder-cutaway)
                   screw-insert-holes
                   ))
     (translate [0 0 -20] (cube 350 350 40))))
-;
+
 (spit "things/right.scad"
       (write-scad model-right))
 
 (spit "things/left.scad"
       (write-scad (mirror [-1 0 0] model-right)))
-;
-;(spit "things/left.scad"
-;      (write-scad (mirror [-1 0 0] model-right)))
+
 (spit "things/test.scad"
       (write-scad
         (difference
@@ -597,15 +701,30 @@
             key-holes
             connectors
             thumb
-            thumb-connectors
+            (if trackpad
+              (do (difference (union thumb-connectors) trackpad-holder-cutaway))
+              thumb-connectors
+            )
+            (if trackpad 
+            (difference trackpad-holder
+              (difference 
+                (union 
+                  (translate [-38 0 -2]
+                    (cube 50 100 100)
+                  )
+                  key-space-below
+                )
+                trackpad-holder-cutaway2)
+            ))
             caps
             thumbcaps
             (difference (union case-walls
-                               screw-insert-outers
-                               )
-                        usb-holder-space
-                        screw-insert-holes
-                        )
+                         screw-insert-outers
+                         )
+                  usb-holder-space
+                  (if trackpad trackpad-holder-cutaway)
+                  screw-insert-holes
+                  )
             (debug key-space-below)
             (debug thumb-space-below)
             (debug usb-holder)
