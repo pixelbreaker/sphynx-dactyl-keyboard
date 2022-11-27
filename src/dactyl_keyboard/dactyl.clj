@@ -564,10 +564,10 @@
          (screw-insert 0 1 bottom-radius top-radius height [-5.3 -12 bottom-height]) ; left
          (if bottom-row
           (screw-insert 0 lastrow bottom-radius top-radius height [-12 -7 bottom-height]) ;thumb
-          (screw-insert 0 lastrow bottom-radius top-radius height [-12 -9 bottom-height]) ;thumb         
+          (screw-insert 0 lastrow bottom-radius top-radius height [-9 -8 bottom-height]) ;thumb         
          )
-         (screw-insert (- lastcol 1) lastrow bottom-radius top-radius height [10 13.5 bottom-height]) ; bottom right
-         (screw-insert (- lastcol 1) 0 bottom-radius top-radius height [10 5 bottom-height]) ; top right
+         (screw-insert (- lastcol 1) lastrow bottom-radius top-radius height [9 13 bottom-height]) ; bottom right
+         (screw-insert lastcol 0 bottom-radius top-radius height [-10 6 bottom-height]) ; top right
          (if bottom-row 
           (screw-insert 2 (+ lastrow 1) bottom-radius top-radius height [0 6.5 bottom-height])
           (screw-insert 2 (+ cornerrow 1) bottom-radius top-radius height [2 0.5 bottom-height]))
@@ -585,22 +585,22 @@
 (def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.65) (+ screw-insert-top-radius 1.65) (+ screw-insert-height 1.5)))
 (def screw-insert-screw-holes (screw-insert-all-shapes 1.7 1.7 350))
 
-(def holder-depth 30)
+(def holder-depth 33)
 (def holder-rad (/ 37 2))
-(def holder-rad2 3)
+(def holder-rad2 2)
 
 (def trackpad-holder-body (->> (difference
-    (binding [*fn* 120] (cylinder [holder-rad holder-rad2] holder-depth))
-    (cylinder [(- holder-rad 2) (- holder-rad2 2)] (+ holder-depth 0.2))
+    (binding [*fn* 100] (cylinder [holder-rad holder-rad2] holder-depth))
+    (binding [*fn* 100] (cylinder [(- holder-rad 2) (- holder-rad2 2)] (+ holder-depth 0.2)))
   )
   (rotate (deg2rad 90) [1 0 0])
   (translate [0 (- (/ holder-depth 2)) 0])
 ))
 
 (def trackpad-holder (union
-                    (->> (import "../things/cirque-35-flat.stl")
+                    (->> (import "../things/cirque-35-flat2.stl")
                       (rotate (deg2rad 270) [1 0 0])
-                      (rotate (deg2rad 180) [0 1 0])
+                      (rotate (deg2rad 166) [0 1 0])
                     )
                     trackpad-holder-body))
 
@@ -608,7 +608,7 @@
   (->> shape
   (rotate (deg2rad 148) [1 0 0])
   (rotate (deg2rad -8) [0 1 0])
-  (rotate (deg2rad -18) [0 0 1])
+  (rotate (deg2rad -13) [0 0 1])
   (translate thumborigin)
   (translate [-58 0 8])
 )
@@ -616,10 +616,17 @@
 
 (def trackpad-holder (trackpad-pos trackpad-holder))
 
-(def trackpad-holder-cutaway (->>
-  (cylinder [(- holder-rad 0.1) (- holder-rad2 0.1)] (+ holder-depth 0.5)) 
-  (rotate (deg2rad 90) [1 0 0])
-  (translate [0 (- (/ holder-depth 2)) 0])
+(def trackpad-holder-cutaway (union 
+  (->>
+    (cylinder [(- holder-rad 0.1) (- holder-rad2 0.1)] (+ holder-depth 0.5))
+    (rotate (deg2rad 90) [1 0 0])
+    (translate [0 (- (/ holder-depth 2)) 0])
+  )
+  (->>
+    (cylinder (- holder-rad 0) 10)
+    (rotate (deg2rad 90) [1 0 0])
+    (translate [0 4 0])
+  )
 ))
 
 (def trackpad-holder-cutaway (trackpad-pos trackpad-holder-cutaway))
@@ -644,7 +651,6 @@
 
 (spit "things/test2.scad" (write-scad usb-holder))
 
-
 (def model-outline
   (project
     (union
@@ -652,8 +658,6 @@
       connectors
       thumb-fill
       thumb-connectors
-      (if trackpad trackpad-holder)
-      (if trackpad trackpad-holder-cutaway)
       case-walls)))
 
 (def model-right
@@ -662,9 +666,9 @@
       key-holes
       connectors
       thumb
-      ;; (debug usb-holder)
+      ;; (debug trackpad-holder-cutaway)
       (if trackpad
-        (do (difference (union thumb-connectors) trackpad-holder-cutaway))
+        (difference (union thumb-connectors) trackpad-holder-cutaway)
         thumb-connectors
       )
       (if trackpad 
@@ -728,6 +732,15 @@
             (debug key-space-below)
             (debug thumb-space-below)
             (debug usb-holder)
+            ;; (debug (difference
+            ;;   bottom-plate
+            ;;   (union
+            ;;     bottom-wall-usb-holder
+            ;;     key-space-below
+            ;;     thumb-space-below
+            ;;     bottom-screw-holes-head
+            ;;     bottom-screw-holes-top
+            ;;     )))
             )
           (translate [0 0 -20] (cube 350 350 40)))))
 
@@ -770,11 +783,11 @@
 (def screw-head-height 1)
 (def layer-height 0.2)
 (def bottom-screw-holes-head
-  (translate [0 0 (- bottom-height)] (screw-insert-all-shapes 2.25 2.25 screw-head-height)))
+  (translate [0 0 (- bottom-height)] (screw-insert-all-shapes 2.25 1 screw-head-height)))
 ;keep a layer thickness so we can bridge over without supports
 (def bottom-screw-holes-top
-  (translate [0 0 (- layer-height screw-head-height)]
-             (screw-insert-all-shapes 1 1 (- bottom-height screw-head-height))))
+  (translate [0 0 (- bottom-height)]
+             (screw-insert-all-shapes 1 1 bottom-height)))
 
 ;(spit "things/test2.scad" (write-scad (union bottom-screw-holes-head bottom-screw-holes-top) ))
 (spit "things/right-plate-print.scad"
@@ -799,6 +812,5 @@
                          )
                        (union
                          bottom-wall-usb-holder
-                         thumb-space-below
                          (screw-insert-all-shapes 1 1 50)))))))
 
