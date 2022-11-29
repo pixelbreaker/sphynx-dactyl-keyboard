@@ -63,18 +63,19 @@
 ;; Switch Hole ;;
 ;;;;;;;;;;;;;;;;;
 
-(def keyswitch-height 14)                                   ;; Was 14.1, then 14.25
-(def keyswitch-width 14)
+(def keyswitch-height 13.81)                                   ;; Was 14.1, then 14.25
+(def keyswitch-width keyswitch-width)
 (def plate-thickness 2)
 (def keyswitch-below-plate (- 8 plate-thickness))           ; approx space needed below keyswitch
 
 (def sa-profile-key-height 12.7)
 
 (def side-nub-thickness 4)
-(def retention-tab-thickness 1.5)
+(def retention-tab-thickness 1.32)
 (def retention-tab-hole-thickness (- plate-thickness retention-tab-thickness))
-(def mount-width (+ keyswitch-width 3))
 (def mount-height (+ keyswitch-height 3))
+(def mount-width (+ keyswitch-width 3))
+(def side-tab-width 10.6)
 
 ;for the bottom
 (def filled-plate
@@ -99,7 +100,7 @@
                                              (/ side-nub-thickness 2)])))
                       (translate [0 0 (- plate-thickness side-nub-thickness)]))
         plate-half (union top-wall left-wall (if create-side-nubs? (with-fn 100 side-nub)))
-        top-nub (->> (cube 5 5 retention-tab-hole-thickness)
+        top-nub (->> (cube 5 side-tab-width retention-tab-hole-thickness)
                      (translate [(+ (/ keyswitch-width 2)) 0 (/ retention-tab-hole-thickness 2)]))
         top-nub-quad (union top-nub
                             (rotate (deg2rad 90) [0 0 1] top-nub)
@@ -560,7 +561,7 @@
          (translate (map + offset [(first position) (second position) (/ height 2)])))))
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
-  (union (screw-insert 2 0 bottom-radius top-radius height [-4 4.5 bottom-height]) ; top middle
+  (union (screw-insert 2 0 bottom-radius top-radius height [-2 4.8 bottom-height]) ; top middle
          (screw-insert 0 1 bottom-radius top-radius height [-5.3 -12 bottom-height]) ; left
          (if bottom-row
           (screw-insert 0 lastrow bottom-radius top-radius height [-12 -7 bottom-height]) ;thumb
@@ -568,10 +569,10 @@
          )
          (screw-insert (- lastcol 1) lastrow bottom-radius top-radius height [9 13 bottom-height]) ; bottom right
          (screw-insert lastcol 0 bottom-radius top-radius height [-10 6 bottom-height]) ; top right
-         (if bottom-row 
+         (if bottom-row ;bottom middle
           (screw-insert 2 (+ lastrow 1) bottom-radius top-radius height [0 6.5 bottom-height])
           (screw-insert 2 (+ cornerrow 1) bottom-radius top-radius height [2 0.5 bottom-height]))
-         )) ;bottom middle
+         )) 
 
 ; Hole Depth Y: 4.4
 (def screw-insert-height 4)
@@ -585,7 +586,7 @@
 (def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.65) (+ screw-insert-top-radius 1.65) (+ screw-insert-height 1.5)))
 (def screw-insert-screw-holes (screw-insert-all-shapes 1.7 1.7 350))
 
-(def holder-depth 33)
+(def holder-depth 31)
 (def holder-rad (/ 37 2))
 (def holder-rad2 2)
 
@@ -623,7 +624,7 @@
     (translate [0 (- (/ holder-depth 2)) 0])
   )
   (->>
-    (cylinder (- holder-rad 0) 10)
+    (cylinder (- holder-rad 0.8) 10)
     (rotate (deg2rad 90) [1 0 0])
     (translate [0 4 0])
   )
@@ -639,13 +640,13 @@
 (def trackpad-holder-cutaway2 (trackpad-pos trackpad-holder-cutaway2))
 
 
-(def usb-holder (mirror [-1 0 0]
-                    (import "../things/holder v8.stl")))
+(def usb-holder (mirror [0 0 0]
+                    (import "../things/holder elite-c.stl")))
 
 (def usb-holder (translate [-40.8 41.5 bottom-height] usb-holder))
 (def usb-holder-space
   (translate [0 0 (/ (+  bottom-height 8.2) 2)]
-  (extrude-linear {:height (+ bottom-height 8.2) :twist 0 :convexity 0}
+  (extrude-linear {:height (+ bottom-height 15.8) :twist 0 :convexity 0}
                   (offset 0.1
                           (project usb-holder)))))
 
@@ -666,6 +667,7 @@
       key-holes
       connectors
       thumb
+      ;; (debug usb-holder)
       ;; (debug trackpad-holder-cutaway)
       (if trackpad
         (difference (union thumb-connectors) trackpad-holder-cutaway)
@@ -753,6 +755,10 @@
             thumbcaps
             )
           (translate [0 0 -20] (cube 350 350 40)))))
+
+(spit "things/keyhole.scad"
+      (write-scad
+        single-plate))
 
 (def wall-shape
   (cut
