@@ -30,10 +30,11 @@
 ;;                                (>= column 4) [0 -10 6]
 ;;                                :else [0 0 0]))
 (defn column-offset [column] (cond
-                               (= column 2) [0 3 -3]
-                               (= column 3) [0 0 -0.5]
-                               (>= column 4) [0 -8 3]
-                               :else [0 0 0]))
+                                (= column 0) [0 -3 0]
+                                (= column 2) [0 3 -3]
+                                (= column 3) [0 0 -0.5]
+                                (>= column 4) [0 -8 3]
+                                :else [0 0 0]))
 
 (def thumb-offsets [15 -5 -2])
 
