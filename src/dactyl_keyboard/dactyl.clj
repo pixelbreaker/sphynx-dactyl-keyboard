@@ -35,7 +35,7 @@
                                 (= column 2) [0 3 -3] ;index
                                 (= column 3) [0 0 -0.5] ;ring
                                 (= column 4) [0 -8 2] ;pinky 1
-                                (>= column 5) [0 -9 2] ;pinky mods
+                                (>= column 5) [0 -8 2] ;pinky mods
                                 :else [0 0 0]))
 
 (def thumb-offsets [12 -5 -2])
@@ -66,8 +66,8 @@
 ;; Switch Hole ;;
 ;;;;;;;;;;;;;;;;;
 
-(def keyswitch-height 13.81)                                   ;; Was 14.1, then 14.25
-(def keyswitch-width keyswitch-width)
+(def keyswitch-height 13.78)                                   ;; Was 14.1, then 14.25
+(def keyswitch-width 13.78)
 (def plate-thickness 2)
 (def keyswitch-below-plate (- 5 plate-thickness))           ; approx space needed below keyswitch
 
@@ -76,8 +76,8 @@
 (def side-nub-thickness 4)
 (def retention-tab-thickness 1.32)
 (def retention-tab-hole-thickness (- plate-thickness retention-tab-thickness))
-(def mount-height (+ keyswitch-height 3.5))
-(def mount-width (+ keyswitch-width 3.5))
+(def mount-height (+ keyswitch-height 3.6))
+(def mount-width (+ keyswitch-width 3.6))
 (def side-tab-width 10.6)
 
 ;for the bottom
