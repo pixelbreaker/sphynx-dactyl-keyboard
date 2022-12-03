@@ -24,24 +24,26 @@
 (def column-style
   (if (> nrows 5) :orthographic :standard))
 
+(def controller-type "rpi-pico") ; elite-c, pro-micro
+
 ;; (defn column-offset [column] (cond
 ;;                                (= column 2) [0 5 -3]
 ;;                                (= column 3) [0 0 -0.5]
 ;;                                (>= column 4) [0 -10 6]
 ;;                                :else [0 0 0]))
 (defn column-offset [column] (cond
-                                (= column 0) [0 -3 0]
-                                (= column 2) [0 3 -3]
-                                (= column 3) [0 0 -0.5]
-                                (>= column 4) [0 -8 3]
+                                (= column 2) [0 3 -3] ;index
+                                (= column 3) [0 0 -0.5] ;ring
+                                (= column 4) [0 -8 2] ;pinky 1
+                                (>= column 5) [0 -9 2] ;pinky mods
                                 :else [0 0 0]))
 
-(def thumb-offsets [15 -5 -2])
+(def thumb-offsets [12 -5 -2])
 
 (def keyboard-z-offset 8)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
 (def bottom-height 2)                                    ; plexiglass plate or printed plate
-(def extra-width 1.8)                                       ; extra space between the base of keys; original= 2
-(def extra-height -0.5)                                      ; original= 0.5
+(def extra-width 1.1)                                       ; extra space between the base of keys; original= 2
+(def extra-height -1.2)                                      ; original= 0.5
 
 (def wall-z-offset -1)                                      ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
 (def wall-xy-offset 1)
@@ -67,15 +69,15 @@
 (def keyswitch-height 13.81)                                   ;; Was 14.1, then 14.25
 (def keyswitch-width keyswitch-width)
 (def plate-thickness 2)
-(def keyswitch-below-plate (- 8 plate-thickness))           ; approx space needed below keyswitch
+(def keyswitch-below-plate (- 5 plate-thickness))           ; approx space needed below keyswitch
 
 (def sa-profile-key-height 12.7)
 
 (def side-nub-thickness 4)
 (def retention-tab-thickness 1.32)
 (def retention-tab-hole-thickness (- plate-thickness retention-tab-thickness))
-(def mount-height (+ keyswitch-height 3))
-(def mount-width (+ keyswitch-width 3))
+(def mount-height (+ keyswitch-height 3.5))
+(def mount-width (+ keyswitch-width 3.5))
 (def side-tab-width 10.6)
 
 ;for the bottom
@@ -84,12 +86,12 @@
        (translate [0 0 (/ plate-thickness 2)])
        ))
 (def single-plate
-  (let [top-wall (->> (cube (+ keyswitch-width 3) 1.5 plate-thickness)
+  (let [top-wall (->> (cube mount-width 1.5 plate-thickness)
                       (translate [0
-                                  (+ (/ 1.5 2) (/ keyswitch-height 2))
+                                  (+ (/ 3.8 4) (/ keyswitch-height 2))
                                   (/ plate-thickness 2)]))
-        left-wall (->> (cube 1.5 (+ keyswitch-height 3) plate-thickness)
-                       (translate [(+ (/ 1.5 2) (/ keyswitch-width 2))
+        left-wall (->> (cube 1.5 mount-height plate-thickness)
+                       (translate [(+ (/ 3.8 4) (/ keyswitch-width 2))
                                    0
                                    (/ plate-thickness 2)]))
         side-nub (->> (binding [*fn* 30] (cylinder 1 2.75))
@@ -116,7 +118,7 @@
 
 ;amoeba is 16 mm high
 (def switch-bottom
-  (translate [0 0 (/ keyswitch-below-plate -2)] (cube 16 keyswitch-width keyswitch-below-plate)))
+  (translate [0 0 (/ keyswitch-below-plate -2)] (cube 17 17 keyswitch-below-plate)))
 
 ;;;;;;;;;;;;;;;;
 ;; SA Keycaps ;;
@@ -128,17 +130,17 @@
                        m (/ 16.5 2)
                        key-cap (hull (->> (polygon [[bl2 bl2] [bl2 (- bl2)] [(- bl2) (- bl2)] [(- bl2) bl2]])
                                           (extrude-linear {:height 0.1 :twist 0 :convexity 0})
-                                          (translate [0 0 0.05]))
+                                          (translate [0 0 0.5]))
                                      (->> (polygon [[m m] [m (- m)] [(- m) (- m)] [(- m) m]])
                                           (extrude-linear {:height 0.1 :twist 0 :convexity 0})
-                                          (translate [0 0 4]))
+                                          (translate [0 0 3]))
                                     ;;  (->> (polygon [[6 6] [6 -6] [-6 -6] [-6 6]])
                                     ;;       (extrude-linear {:height 0.1 :twist 0 :convexity 0})
                                     ;;       (translate [0 0 12]))
                                           )]
                    (->> key-cap
                         (translate [0 0 (+ 2 plate-thickness)])
-                        (color [0.8 0.8 0.8 1])))
+                        (color [0.9 0.9 0.9 0.6])))
              2   (let [bl2 sa-length
                        bw2 (/ 18.25 2)
                        key-cap (hull (->> (polygon [[bw2 bl2] [bw2 (- bl2)] [(- bw2) (- bl2)] [(- bw2) bl2]])
@@ -343,9 +345,8 @@
 
 ; convexer
 (defn thumb-r-place [shape] (thumb-place [14 -37 10] [-15 -10 3] shape)) ; right
-(defn thumb-m-place [shape] (thumb-place [10 -21 20] [-33 -15 -7] shape)) ; middle
-(defn thumb-l-place [shape] (thumb-place [6 -3 35] [-52.5 -25.5 -11.5] shape)) ; left
-
+(defn thumb-m-place [shape] (thumb-place [10 -21 22] [-33.9 -15.8 -7] shape)) ; middle
+(defn thumb-l-place [shape] (thumb-place [8 -3 33] [-53.2 -26.3 -11.5] shape)) ; left
 
 (defn thumb-layout [shape]
   (union
@@ -433,8 +434,8 @@
       (key-place 1 cornerrow web-post-br)
       )
     (triangle-hulls
-      (thumb-r-place fat-web-post-tl)
-      (thumb-r-place fat-web-post-tr)
+      (thumb-r-place web-post-tl)
+      (thumb-r-place web-post-tr)
       (key-place 1 cornerrow web-post-br)
       (key-place 2 lastrow web-post-tl)
       )
@@ -442,9 +443,9 @@
       (union
         (triangle-hulls
           (key-place 2 lastrow web-post-tl)
-          (thumb-r-place fat-web-post-tr)
+          (thumb-r-place web-post-tr)
           (key-place 2 lastrow web-post-bl)
-          (thumb-r-place fat-web-post-br)
+          (thumb-r-place web-post-br)
           )
         (triangle-hulls
           (thumb-r-place web-post-br)
@@ -455,14 +456,14 @@
       (union 
         (triangle-hulls
           (key-place 2 lastrow web-post-tl)
-          (thumb-r-place fat-web-post-tr)
+          (thumb-r-place web-post-tr)
           (key-place 3 cornerrow web-post-bl)
-          (thumb-r-place fat-web-post-br)
+          (thumb-r-place web-post-br)
           )
         (triangle-hulls
           (key-place 2 lastrow web-post-tr)
           (key-place 3 cornerrow web-post-bl)
-          (thumb-r-place fat-web-post-br)
+          (thumb-r-place web-post-br)
           )))
     ))
 
@@ -562,11 +563,11 @@
          (translate (map + offset [(first position) (second position) (/ height 2)])))))
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
-  (union (screw-insert 2 0 bottom-radius top-radius height [-2 4.8 bottom-height]) ; top middle
+  (union (screw-insert 2 0 bottom-radius top-radius height [0 4.8 bottom-height]) ; top middle
          (screw-insert 0 1 bottom-radius top-radius height [-5.3 -12 bottom-height]) ; left
          (if bottom-row
           (screw-insert 0 lastrow bottom-radius top-radius height [-12 -7 bottom-height]) ;thumb
-          (screw-insert 0 lastrow bottom-radius top-radius height [-9 -8 bottom-height]) ;thumb         
+          (screw-insert 0 lastrow bottom-radius top-radius height [-8.2 -7.3 bottom-height]) ;thumb         
          )
          (screw-insert (- lastcol 1) lastrow bottom-radius top-radius height [9 13 bottom-height]) ; bottom right
          (screw-insert lastcol 0 bottom-radius top-radius height [-10 6 bottom-height]) ; top right
@@ -576,7 +577,7 @@
          )) 
 
 ; Hole Depth Y: 4.4
-(def screw-insert-height 4)
+(def screw-insert-height 3)
 
 ; Hole Diameter C: 4.1-4.4
 (def screw-insert-bottom-radius (/ 4.0 2))
@@ -599,8 +600,8 @@
   (translate [0 (- (/ holder-depth 2)) 0])
 ))
 
-(def trackpad-holder (union
-                    (->> (import "../things/cirque-35-flat2.stl")
+(defn trackpad-holder-main [flip] (union
+                    (->> (mirror [(if flip -1 0) 0 0] (import "../things/cirque-35-flat2.stl"))
                       (rotate (deg2rad 270) [1 0 0])
                       (rotate (deg2rad 166) [0 1 0])
                     )
@@ -608,15 +609,15 @@
 
 (defn trackpad-pos [shape]
   (->> shape
-  (rotate (deg2rad 148) [1 0 0])
+  (rotate (deg2rad 151) [1 0 0])
   (rotate (deg2rad -8) [0 1 0])
-  (rotate (deg2rad -13) [0 0 1])
+  (rotate (deg2rad 10) [0 0 1])
   (translate thumborigin)
-  (translate [-58 0 8])
+  (translate [-58 -2 10])
 )
 )
 
-(def trackpad-holder (trackpad-pos trackpad-holder))
+(defn trackpad-holder [flip] (trackpad-pos (trackpad-holder-main flip)))
 
 (def trackpad-holder-cutaway (union 
   (->>
@@ -642,16 +643,22 @@
 
 
 (def usb-holder (mirror [0 0 0]
-                    (import "../things/holder elite-c.stl")))
+  (import (cond
+    (= controller-type "rpi-pico") "../things/holder rpi-pico2.stl"
+    (= controller-type "elite-c") "../things/holder elite-c.stl"
+    :else "../things/holder pro-micro.stl"
+  ))))
 
-(def usb-holder (translate [-40.8 41.5 bottom-height] usb-holder))
+(def usb-holder (translate (cond 
+                            (= controller-type "rpi-pico") [-41.5 41.4 bottom-height]
+                            :else [-40.8 41.5 bottom-height]) usb-holder))
 (def usb-holder-space
   (translate [0 0 (/ (+  bottom-height 8.2) 2)]
   (extrude-linear {:height (+ bottom-height 15.8) :twist 0 :convexity 0}
                   (offset 0.1
                           (project usb-holder)))))
 
-(spit "things/test2.scad" (write-scad usb-holder))
+(spit "things/usb-holder.scad" (write-scad usb-holder))
 
 (def model-outline
   (project
@@ -662,7 +669,7 @@
       thumb-connectors
       case-walls)))
 
-(def model-right
+(defn model-side [flip] 
   (difference
     (union
       key-holes
@@ -675,16 +682,17 @@
         thumb-connectors
       )
       (if trackpad 
-        (difference trackpad-holder
+        (difference (trackpad-holder flip)
           (difference 
             (union 
               (rotate (deg2rad 8) [0 0 1]
                 (translate [-38 0 -2]
                   (cube 50 100 100)
                 ))
-              ;; key-space-below
+              
             )
             trackpad-holder-cutaway2)
+            key-space-below
         ))
         (difference (union case-walls
                          screw-insert-outers
@@ -692,46 +700,30 @@
                   usb-holder-space
                   (if trackpad trackpad-holder-cutaway)
                   screw-insert-holes
+                  ;; key-space-below
+                  ;; thumb-space-below    
                   ))
-    (translate [0 0 -20] (cube 350 350 40))))
+    (translate [0 0 -20] (cube 350 350 40)))
+)
 
 (spit "things/right.scad"
-      (write-scad model-right))
+      (write-scad (model-side false)))
 
 (spit "things/left.scad"
-      (write-scad (mirror [-1 0 0] model-right)))
+      (write-scad (mirror [-1 0 0] (model-side true))))
+
+(spit "things/both.scad" 
+      (write-scad 
+        (rotate (deg2rad 8) [0 0 1] (translate [110 0 0] (model-side false)))
+        (rotate (deg2rad -8) [0 0 1] (translate [-110 0 0] (mirror [-1 0 0] (model-side true))))
+      ))
 
 (spit "things/test.scad"
       (write-scad
-        (difference
-          (union
-            key-holes
-            connectors
-            thumb
-            (if trackpad
-              (do (difference (union thumb-connectors) trackpad-holder-cutaway))
-              thumb-connectors
-            )
-            (if trackpad 
-            (difference trackpad-holder
-              (difference 
-                (union 
-                  (translate [-38 0 -2]
-                    (cube 50 100 100)
-                  )
-                  key-space-below
-                )
-                trackpad-holder-cutaway2)
-            ))
+        (union
+            (model-side false)
             caps
             thumbcaps
-            (difference (union case-walls
-                         screw-insert-outers
-                         )
-                  usb-holder-space
-                  (if trackpad trackpad-holder-cutaway)
-                  screw-insert-holes
-                  )
             (debug key-space-below)
             (debug thumb-space-below)
             (debug usb-holder)
@@ -745,7 +737,7 @@
             ;;     bottom-screw-holes-top
             ;;     )))
             )
-          (translate [0 0 -20] (cube 350 350 40)))))
+          ))
 
 (spit "things/thumb.scad"
       (write-scad
