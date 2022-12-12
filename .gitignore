@@ -3,8 +3,8 @@
 
 .repl-*
 .nrepl-*
-.lsp*
-.clj-kondo*
+/.lsp
+/clj-kondo
 
 .lein-*
 *.gcode
