@@ -1,4 +1,4 @@
-(ns dactyl-keyboard.dactyl
+(ns dactyl
   (:refer-clojure :exclude [use import])
   (:require [clojure.core.matrix :refer [array matrix mmul]]
             [scad-clj.scad :refer :all]
@@ -796,7 +796,7 @@
          bottom-screw-holes-head
          bottom-screw-holes-top
          (plate-feet-place 4 (- (- bottom-height 2)))))))
-git
+
 (spit "things/right-plate-cut.scad"
       (write-scad
        (cut
