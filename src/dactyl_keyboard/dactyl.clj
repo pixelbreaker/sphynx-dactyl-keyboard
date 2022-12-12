@@ -800,13 +800,13 @@
 (spit "things/right-plate-cut.scad"
       (write-scad
        (cut
-        (translate [0 0 (+ bottom-height 1)] ;biggest cutout on top
+        (translate [0 0 -1] ;biggest cutout on top
                    (difference
                     (union
                      bottom-plate)
                     (union
                      bottom-wall-usb-holder
-                     (screw-insert-all-shapes 1 1 50)))))))
+                     bottom-screw-holes-head))))))
 
 (def voronoi-model (difference
                     (union
