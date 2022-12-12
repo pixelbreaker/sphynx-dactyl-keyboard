@@ -614,7 +614,7 @@
                                (rotate (deg2rad 90) [1 0 0])))
 
 (defn trackpad-holder-main [flip] (union
-                                   (->> (mirror [(if flip -1 0) 0 0] (import "../things/cirque-40-flat.stl"))
+                                   (->> (mirror [(if flip -1 0) 0 0] (import "../src/models/cirque-40-flat.stl"))
                                         (rotate (deg2rad 270) [1 0 0])
                                         (rotate (deg2rad 166) [0 1 0]))
                                    trackpad-holder-body))
@@ -651,9 +651,9 @@
 
 (def usb-holder (mirror [0 0 0]
                         (import (cond
-                                  (= controller-type "rpi-pico") "../things/holder rpi-pico.stl"
-                                  (= controller-type "elite-c") "../things/holder elite-c.stl"
-                                  :else "../things/holder pro-micro.stl"))))
+                                  (= controller-type "rpi-pico") "../src/models/holder rpi-pico.stl"
+                                  (= controller-type "elite-c") "../src/models/holder elite-c.stl"
+                                  :else "../src/models/holder pro-micro.stl"))))
 
 (def usb-holder (translate (cond
                              (= controller-type "rpi-pico") [-41 41 bottom-height]
@@ -796,7 +796,7 @@
          bottom-screw-holes-head
          bottom-screw-holes-top
          (plate-feet-place 4 (- (- bottom-height 2)))))))
-
+git
 (spit "things/right-plate-cut.scad"
       (write-scad
        (cut
@@ -820,7 +820,7 @@
                                      (difference bottom-plate-shape ; voronoi base plate
                                                  (difference
                                                   (offset -3 bottom-plate-shape)
-                                                  (translate [-120 -50 0] (scale [0.14 0.14 1] (import "../things/voronoi.dxf")))))))
+                                                  (translate [-120 -50 0] (scale [0.14 0.14 1] (import "../src/models/voronoi.dxf")))))))
                     (union
         ;;  bottom-wall-usb-holder
                      bottom-screw-holes-head

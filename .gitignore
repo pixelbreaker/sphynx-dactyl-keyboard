@@ -5,13 +5,14 @@
 .nrepl-*
 /.lsp
 /clj-kondo
+/print
 
 .lein-*
 *.gcode
 *.scad
 /target
-*.stl
+/things/*.stl
+/things/*.dxf
 *.ai
 *.svg
 /.idea/
-/dactyl-manuform-mini-keyboard.iml
