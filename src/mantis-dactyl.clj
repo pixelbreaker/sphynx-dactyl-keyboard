@@ -24,20 +24,14 @@
 (def column-style
   (if (> nrows 5) :orthographic :standard))
 
-(def controller-type "rpi-pico") ; elite-c, pro-micro
+(def controller-type "elite-c") ; rpi-pico, elite-c, pro-micro
 
-;; (defn column-offset [column] (cond
-;;                                (= column 2) [0 5 -3]
-;;                                (= column 3) [0 0 -0.5]
-;;                                (>= column 4) [0 -10 6]
-;;                                :else [0 0 0]))
 (defn column-offset [column] (cond
                                (= column 0) [0 -0.3 -0.2] ;inner
                                (= column 1) [0 0.2 0] ;index
                                (= column 2) [0 3 -3] ;middle
                                (= column 3) [0 -0.5 -0.5] ;ring
-                               (= column 4) [0 -11.5 2] ;pinky 1
-                                ;; (>= column 5) [0 -8 2] ;pinky mods
+                               (>= column 4) [0 -11.5 2] ;pinky 1
                                :else [0 0 0]))
 
 (def thumb-offsets [12 -5.4 -2])
@@ -134,11 +128,7 @@
                                           (translate [0 0 0.5]))
                                      (->> (polygon [[m m] [m (- m)] [(- m) (- m)] [(- m) m]])
                                           (extrude-linear {:height 0.1 :twist 0 :convexity 0})
-                                          (translate [0 0 3]))
-                                    ;;  (->> (polygon [[6 6] [6 -6] [-6 -6] [-6 6]])
-                                    ;;       (extrude-linear {:height 0.1 :twist 0 :convexity 0})
-                                    ;;       (translate [0 0 12]))
-                                     )]
+                                          (translate [0 0 3])))]
                    (->> key-cap
                         (translate [0 0 (+ 2 plate-thickness)])
                         (color [0.3 0.3 0.3 0.6])))
@@ -554,21 +544,20 @@
          (translate (map + offset [(first position) (second position) (/ height 2)])))))
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
-  (union (screw-insert 2 0 bottom-radius top-radius height [0 4.8 bottom-height]) ; top middle
-         (screw-insert 0 1 bottom-radius top-radius height [-5 -12 bottom-height]) ; left side
-         (screw-insert lastcol 0 bottom-radius top-radius height [-10 6 bottom-height]) ; top right
+  (union (screw-insert 2 0 bottom-radius top-radius height [0 4.3 bottom-height]) ; top middle
+         (screw-insert 0 1 bottom-radius top-radius height [-4.3 -12 bottom-height]) ; left side
+         (screw-insert lastcol 0 bottom-radius top-radius height [-10.5 5.5 bottom-height]) ; top right
          (if bottom-row
            (screw-insert 0 lastrow bottom-radius top-radius height [-12 -7 bottom-height]) ;thumb
            (screw-insert 0 lastrow bottom-radius top-radius height [-10.5 -8.5 bottom-height]) ;thumb         
            )
          (screw-insert (- lastcol 2) lastrow bottom-radius top-radius height [5.5 7 bottom-height]) ; bottom front
-        ;;  (screw-insert (- lastcol 0) lastrow bottom-radius top-radius height [6 13 bottom-height]) ; bottom right 2
          (if bottom-row ;bottom middle
            (screw-insert 2 (+ lastrow 1) bottom-radius top-radius height [0 6.5 bottom-height])
-           (screw-insert 2 (+ cornerrow 1) bottom-radius top-radius height [-7 -12 bottom-height]))))
+           (screw-insert 2 (+ cornerrow 1) bottom-radius top-radius height [-7 -11.5 bottom-height]))))
 
 ; Hole Depth Y: 4.4
-(def screw-insert-height 4)
+(def screw-insert-height 5)
 
 ; Hole Diameter C: 4.1-4.4
 (def screw-insert-bottom-radius (/ 4.0 2))
@@ -576,7 +565,7 @@
 (def screw-insert-holes (screw-insert-all-shapes screw-insert-bottom-radius screw-insert-top-radius screw-insert-height))
 
 ; Wall Thickness W:\t1.65
-(def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.8) (+ screw-insert-top-radius 1.8) (+ screw-insert-height 1.5)))
+(def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 2.2) (+ screw-insert-top-radius 2.2) screw-insert-height))
 (def screw-insert-screw-holes (screw-insert-all-shapes 1.7 1.7 350))
 
 (def plate-stops
@@ -589,9 +578,11 @@
 (defn plate-feet-place [radius z]
   (union
    (screw-insert lastcol cornerrow radius radius bottom-height [4 -3.5 z]) ; bottom right
-   (screw-insert 0 lastrow radius radius bottom-height [-21 -25 z]) ; thumb
-   (screw-insert lastcol 0 radius radius bottom-height [4 2.5 z]) ; top right
-   (screw-insert 0 0 radius radius bottom-height [0 5 z]) ; usb holder
+   (screw-insert 0 lastrow radius radius bottom-height [-21 -25.5 z]) ; thumb l
+   (screw-insert 2 lastrow radius radius bottom-height [-4.1 -4.5 z]) ; thumb r
+   (screw-insert (- lastcol 1) 0 radius radius bottom-height [5 2.8 z]) ; top inner right
+   (screw-insert lastcol 0 radius radius bottom-height [4.3 2.8 z]) ; top right
+   (screw-insert 0 0 radius radius bottom-height [0 5.6 z]) ; usb holder
    ))
 
 (def holder-depth 20)
@@ -614,9 +605,10 @@
                                (rotate (deg2rad 90) [1 0 0])))
 
 (defn trackpad-holder-main [flip] (union
-                                   (->> (mirror [(if flip -1 0) 0 0] (import "../src/models/cirque-40-flat.stl"))
+                                   (->> (import "../src/models/cirque-40-flat.stl")
+                                        (mirror [(if flip -1 0) 0 0])
                                         (rotate (deg2rad 270) [1 0 0])
-                                        (rotate (deg2rad 166) [0 1 0]))
+                                        (rotate (deg2rad 160) [0 1 0]))
                                    trackpad-holder-body))
 
 (defn trackpad-pos [shape]
@@ -657,7 +649,7 @@
 
 (def usb-holder (translate (cond
                              (= controller-type "rpi-pico") [-41 41 bottom-height]
-                             :else [-40.8 41.5 bottom-height]) usb-holder))
+                             :else [-39.5 41.5 bottom-height]) usb-holder))
 (def usb-holder-space
   (translate [0 0 (/ (+  bottom-height 8.2) 2)]
              (extrude-linear {:height (+ bottom-height 15.8) :twist 0 :convexity 0}
@@ -681,9 +673,6 @@
     key-holes
     connectors
     thumb
-      ;; (debug usb-holder)
-      ;; (debug trackpad-holder-cutaway)
-      ;; (debug key-space-below)
     (if trackpad
       (difference (union thumb-connectors) trackpad-holder-cutaway)
       thumb-connectors)
@@ -705,6 +694,24 @@
                 thumb-space-below))
    (translate [0 0 -20] (cube 350 350 40))))
 
+(def voronoi-model (difference
+                    (union
+                     (intersection
+                      (union
+                       (translate [0 0 (- bottom-height)] (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.8) (+ screw-insert-bottom-radius 1.8) bottom-height))
+                       (plate-feet-place 5 0))
+                      bottom-plate)
+
+                     (extrude-linear {:height bottom-height :twist 0 :convexity 0 :center false}
+                                     (difference bottom-plate-shape ; voronoi base plate
+                                                 (difference
+                                                  (offset -3 bottom-plate-shape)
+                                                  (translate [-120 -55 0] (scale [0.16 0.16 1] (import "../src/models/voronoi.dxf")))))))
+                    (union
+                     bottom-screw-holes-head
+                     bottom-screw-holes-top
+                     (plate-feet-place 4 (- (- bottom-height 2))))))
+
 (spit "things/right.scad"
       (write-scad (model-side false)))
 
@@ -725,16 +732,7 @@
         (debug key-space-below)
         (debug thumb-space-below)
         (debug usb-holder)
-            ;; (debug (difference
-            ;;   bottom-plate
-            ;;   (union
-            ;;     bottom-wall-usb-holder
-            ;;     key-space-below
-            ;;     thumb-space-below
-            ;;     bottom-screw-holes-head
-            ;;     bottom-screw-holes-top
-            ;;     )))
-        )))
+        (debug voronoi-model))))
 
 (spit "things/thumb.scad"
       (write-scad
@@ -765,25 +763,19 @@
 (def bottom-plate
   (extrude-linear {:height bottom-height :twist 0 :convexity 0 :center false}
                   bottom-plate-shape))
-;; (def bottom-wall
-;;   (translate [0 0 bottom-height-half] (extrude-linear {:height bottom-height :twist 0 :convexity 0} wall-shape)))
 
 (def bottom-wall-usb-holder
   (translate [0 0 bottom-height]
              (extrude-linear {:height bottom-height-half :twist 0 :convexity 0}
                              (offset 3))))
 
-(def screw-head-height 1.5)
+(def screw-head-height 1.8)
 (def bottom-screw-holes-head
-  (translate [0 0 (- bottom-height)] (screw-insert-all-shapes 2.8 1 screw-head-height)))
+  (translate [0 0 (- bottom-height)] (screw-insert-all-shapes 2.9 1 screw-head-height)))
 
 (def bottom-screw-holes-top
   (translate [0 0 (- bottom-height)]
              (screw-insert-all-shapes 1.5 1.5 bottom-height)))
-
-;; (spit "things/trackpad-holder.scad"
-;;   (write-scad (trackpad-holder false))
-;; )
 
 (spit "things/right-plate-print.scad"
       (write-scad
@@ -807,25 +799,6 @@
                     (union
                      bottom-wall-usb-holder
                      bottom-screw-holes-head))))))
-
-(def voronoi-model (difference
-                    (union
-                     (intersection
-                      (union
-                       (translate [0 0 (- bottom-height)] (screw-insert-all-shapes (+ screw-insert-bottom-radius 1.8) (+ screw-insert-bottom-radius 1.8) bottom-height))
-                       (plate-feet-place 5 0))
-                      bottom-plate)
-
-                     (extrude-linear {:height bottom-height :twist 0 :convexity 0 :center false}
-                                     (difference bottom-plate-shape ; voronoi base plate
-                                                 (difference
-                                                  (offset -3 bottom-plate-shape)
-                                                  (translate [-120 -50 0] (scale [0.14 0.14 1] (import "../src/models/voronoi.dxf")))))))
-                    (union
-        ;;  bottom-wall-usb-holder
-                     bottom-screw-holes-head
-                     bottom-screw-holes-top
-                     (plate-feet-place 4 (- (- bottom-height 2))))))
 
 (spit "things/voronoi-plate-print.scad"
       (write-scad voronoi-model))
