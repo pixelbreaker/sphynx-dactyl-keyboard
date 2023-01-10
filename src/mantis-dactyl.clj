@@ -565,7 +565,7 @@
 (def screw-insert-holes (screw-insert-all-shapes screw-insert-bottom-radius screw-insert-top-radius screw-insert-height))
 
 ; Wall Thickness W:\t1.65
-(def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 2.2) (+ screw-insert-top-radius 2.2) screw-insert-height))
+(def screw-insert-outers (screw-insert-all-shapes (+ screw-insert-bottom-radius 2.8) (+ screw-insert-top-radius 2.8) screw-insert-height))
 (def screw-insert-screw-holes (screw-insert-all-shapes 1.7 1.7 350))
 
 (def plate-stops
@@ -650,6 +650,11 @@
 (def usb-holder (translate (cond
                              (= controller-type "rpi-pico") [-41 41 bottom-height]
                              :else [-39.5 41.5 bottom-height]) usb-holder))
+;; (def usb-holder (let [position (key-position 0 0 [(+ (/ keyswitch-width 2) 2.5)
+;;                                                   (+ (/ keyswitch-height 2) wall-thickness wall-xy-offset 3.5) 0])]
+;;                   (translate (cond
+;;                                (= controller-type "rpi-pico") [-41 41 bottom-height]
+;;                                :else [(first position) (second position) bottom-height]) usb-holder)))
 (def usb-holder-space
   (translate [0 0 (/ (+  bottom-height 8.2) 2)]
              (extrude-linear {:height (+ bottom-height 15.8) :twist 0 :convexity 0}
