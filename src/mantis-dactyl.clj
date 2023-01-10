@@ -41,10 +41,10 @@
 (def extra-width 1.1)                                       ; extra space between the base of keys; original= 2
 (def extra-height -1.2)                                      ; original= 0.5
 
-(def wall-z-offset -1)                                      ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
-(def wall-xy-offset 1)
+(def wall-z-offset -3)                                      ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
+(def wall-xy-offset 5)
 
-(def wall-thickness 2)                                      ; wall thickness parameter; originally 5
+(def wall-thickness 2.5)                                      ; wall thickness parameter; originally 5
 
 ; If you use Cherry MX or Gateron switches, this can be turned on.
 ; If you use other switches such as Kailh, you should set this as false
@@ -498,10 +498,10 @@
    (for [x (range 0 ncols)] (key-wall-brace x 0 0 1 web-post-tl x 0 0 1 web-post-tr))
    (for [x (range 1 ncols)] (key-wall-brace x 0 0 1 web-post-tl (dec x) 0 0 1 web-post-tr))
     ;; ; left wall
-   (for [y (range 0 lastrow)] (key-wall-brace 0 y -1 (if (= y 0) 1 0) web-post-tl 0 y -1 0 web-post-bl))
+   (for [y (range 0 lastrow)] (key-wall-brace 0 y -1 0 web-post-tl 0 y -1 0 web-post-bl))
    (for [y (range 1 lastrow)] (key-wall-brace 0 (dec y) -1 0 web-post-bl 0 y -1 0 web-post-tl))
     ;; ; left-back-corner
-   (key-wall-brace 0 0 0 1 web-post-tl 0 0 -1 1 web-post-tl)
+   (key-wall-brace 0 0 0 1 web-post-tl 0 0 -1 0 web-post-tl)
    (wall-brace (partial key-place 0 cornerrow) -1 0 web-post-bl thumb-m-place -0.5 1 web-post-tl)
     ;; ; front wall
    (if bottom-row
@@ -647,14 +647,14 @@
                                   (= controller-type "elite-c") "../src/models/holder elite-c.stl"
                                   :else "../src/models/holder pro-micro.stl"))))
 
-(def usb-holder (translate (cond
-                             (= controller-type "rpi-pico") [-41 41 bottom-height]
-                             :else [-39.5 41.5 bottom-height]) usb-holder))
-;; (def usb-holder (let [position (key-position 0 0 [(+ (/ keyswitch-width 2) 2.5)
-;;                                                   (+ (/ keyswitch-height 2) wall-thickness wall-xy-offset 3.5) 0])]
-;;                   (translate (cond
-;;                                (= controller-type "rpi-pico") [-41 41 bottom-height]
-;;                                :else [(first position) (second position) bottom-height]) usb-holder)))
+;; (def usb-holder (translate (cond
+;;                              (= controller-type "rpi-pico") [-41 41 bottom-height]
+;;                              :else [-39.5 41.5 bottom-height]) usb-holder))
+(def usb-holder (let [position (key-position 0 0 [(+ (/ keyswitch-width 2) 2.2)
+                                                  (+ (/ keyswitch-height 2) (* wall-thickness 2) wall-xy-offset 2) 0])]
+                  (translate (cond
+                               (= controller-type "rpi-pico") [-41 41 bottom-height]
+                               :else [(first position) (second position) bottom-height]) usb-holder)))
 (def usb-holder-space
   (translate [0 0 (/ (+  bottom-height 8.2) 2)]
              (extrude-linear {:height (+ bottom-height 15.8) :twist 0 :convexity 0}
