@@ -13,36 +13,36 @@
 
 (def nrows 4)
 (def ncols 5)
-(def trackpad true)
+(def trackpad false)
 (def bottom-row false)
 
 (def column-curvature (deg2rad 17))                         ; 15       ; curvature of the columns
-(def row-curvature (deg2rad 6))                             ; 5        ; curvature of the rows
+(def row-curvature (deg2rad 4))                             ; 5        ; curvature of the rows
 (def centerrow (- nrows 2.5))                               ; controls front-back tilt
-(def centercol 3)                                           ; controls left-right tilt / tenting (higher number is more tenting)
-(def tenting-angle (deg2rad 14))                            ; or, change this for more precise tenting control
+(def centercol 2.5)                                           ; controls left-right tilt / tenting (higher number is more tenting)
+(def tenting-angle (deg2rad 10))                            ; or, change this for more precise tenting control
 (def column-style
   (if (> nrows 5) :orthographic :standard))
 
 (def controller-type "elite-c") ; rpi-pico, elite-c, pro-micro
 
 (defn column-offset [column] (cond
-                               (= column 0) [0 -0.3 -0.2] ;inner
-                               (= column 1) [0 0.2 0] ;index
+                              ;;  (= column 0) [0 -0.3 -0.2] ;inner
+                               (<= column 1) [0 0.2 0] ;index
                                (= column 2) [0 3 -3] ;middle
                                (= column 3) [0 -0.5 -0.5] ;ring
                                (>= column 4) [0 -11.5 2] ;pinky 1
                                :else [0 0 0]))
 
-(def thumb-offsets [12 -5.4 -2])
+(def thumb-offsets [5 -4.4 4])
 
 (def keyboard-z-offset 9)                                   ; controls overall height; original=9 with centercol=3; use 16 for centercol=2
-(def bottom-height 3)                                    ; plexiglass plate or printed plate
+(def bottom-height 2)                                    ; plexiglass plate or printed plate
 (def extra-width 1.1)                                       ; extra space between the base of keys; original= 2
 (def extra-height -1.2)                                      ; original= 0.5
 
-(def wall-z-offset -3)                                      ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
-(def wall-xy-offset 5)
+(def wall-z-offset -3.5)                                      ; -5                ; original=-15 length of the first downward-sloping part of the wall (negative)
+(def wall-xy-offset 4)
 
 (def wall-thickness 2.5)                                      ; wall thickness parameter; originally 5
 
@@ -333,9 +333,9 @@
        (translate move)))
 
 ; convexer
-(defn thumb-r-place [shape] (thumb-place [14 -37 10] [-15 -10 3] shape)) ; right
-(defn thumb-m-place [shape] (thumb-place [10 -21 22] [-33.9 -15.8 -7] shape)) ; middle
-(defn thumb-l-place [shape] (thumb-place [8 -3 33] [-53.6 -26.1 -11.5] shape)) ; left
+(defn thumb-r-place [shape] (thumb-place [11.5 -25 10] [-15 -10.3 -2] shape)) ; right
+(defn thumb-m-place [shape] (thumb-place [9 -13 22] [-33.9 -15.8 -9] shape)) ; middle
+(defn thumb-l-place [shape] (thumb-place [8 0 33] [-53.6 -26.1 -11] shape)) ; left
 
 (defn thumb-layout [shape]
   (union
@@ -544,17 +544,17 @@
          (translate (map + offset [(first position) (second position) (/ height 2)])))))
 
 (defn screw-insert-all-shapes [bottom-radius top-radius height]
-  (union (screw-insert 2 0 bottom-radius top-radius height [0 4.3 bottom-height]) ; top middle
-         (screw-insert 0 1 bottom-radius top-radius height [-4.3 -12 bottom-height]) ; left side
-         (screw-insert lastcol 0 bottom-radius top-radius height [-10.5 5.5 bottom-height]) ; top right
+  (union (screw-insert 2 0 bottom-radius top-radius height [0 8.3 bottom-height]) ; top middle
+         (screw-insert 0 1 bottom-radius top-radius height [-9 -12 bottom-height]) ; left side
+         (screw-insert lastcol 0 bottom-radius top-radius height [-8 8.5 bottom-height]) ; top right
          (if bottom-row
            (screw-insert 0 lastrow bottom-radius top-radius height [-12 -7 bottom-height]) ;thumb
-           (screw-insert 0 lastrow bottom-radius top-radius height [-10.5 -8.5 bottom-height]) ;thumb         
+           (screw-insert 0 lastrow bottom-radius top-radius height [-19 -6 bottom-height]) ;thumb         
            )
-         (screw-insert (- lastcol 2) lastrow bottom-radius top-radius height [5.5 7 bottom-height]) ; bottom front
-         (if bottom-row ;bottom middle
+         (screw-insert lastcol cornerrow bottom-radius top-radius height [-5 -9 bottom-height]) ; bottom front
+         (if bottom-row ;bottom thumb
            (screw-insert 2 (+ lastrow 1) bottom-radius top-radius height [0 6.5 bottom-height])
-           (screw-insert 2 (+ cornerrow 1) bottom-radius top-radius height [-7 -11.5 bottom-height]))))
+           (screw-insert 2 (+ cornerrow 1) bottom-radius top-radius height [-4 -5 bottom-height]))))
 
 ; Hole Depth Y: 4.4
 (def screw-insert-height 5)
@@ -570,19 +570,19 @@
 
 (def plate-stops
   (union
-   (screw-insert lastcol cornerrow 2 2 1.8 [8.5 -8.5 bottom-height]) ; bottom right
-   (screw-insert 0 lastrow 2 2 1.8 [-22 -32 bottom-height]) ; thumb
-   (screw-insert lastcol 0 2 2 1.8 [8.5 7.5 bottom-height]) ; top right
+  ;;  (screw-insert lastcol cornerrow 2 2 1.8 [8.5 -8.5 bottom-height]) ; bottom right
+   (screw-insert 0 lastrow 3 3 1.8 [-22 -32 bottom-height]) ; thumb
+  ;;  (screw-insert lastcol 0 2 2 1.8 [8.5 7.5 bottom-height]) ; top right
    ))
 
 (defn plate-feet-place [radius z]
   (union
-   (screw-insert lastcol cornerrow radius radius bottom-height [4 -3.5 z]) ; bottom right
-   (screw-insert 0 lastrow radius radius bottom-height [-21 -25.5 z]) ; thumb l
-   (screw-insert 2 lastrow radius radius bottom-height [-4.1 -4.5 z]) ; thumb r
-   (screw-insert (- lastcol 1) 0 radius radius bottom-height [5 2.8 z]) ; top inner right
-   (screw-insert lastcol 0 radius radius bottom-height [4.3 2.8 z]) ; top right
-   (screw-insert 0 0 radius radius bottom-height [0 5.6 z]) ; usb holder
+   (screw-insert lastcol cornerrow radius radius bottom-height [6.5 -7 z]) ; bottom right
+   (screw-insert 0 lastrow radius radius bottom-height [-26 -28 z]) ; thumb l
+   (screw-insert 2 lastrow radius radius bottom-height [-12 -10 z]) ; thumb r
+   (screw-insert (- lastcol 1) 0 radius radius bottom-height [4 6.5 z]) ; top inner right
+   (screw-insert lastcol 0 radius radius bottom-height [6.5 6 z]) ; top right
+   (screw-insert 0 0 radius radius bottom-height [-6 5.6 z]) ; usb holder
    ))
 
 (def holder-depth 20)
@@ -715,7 +715,7 @@
                     (union
                      bottom-screw-holes-head
                      bottom-screw-holes-top
-                     (plate-feet-place 4 (- (- bottom-height 2))))))
+                     (plate-feet-place 4 (- (/ bottom-height 2))))))
 
 (spit "things/right.scad"
       (write-scad (model-side false)))
