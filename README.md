@@ -6,6 +6,7 @@ Photos: https://imgur.com/gallery/YePWDY5
 
 ## Forks
 
+- https://github.com/okke-formsma/dactyl-manuform-tight/
 - https://github.com/lebastaq/dactyl-manuform-mini-keyboard
 
 ## Features
